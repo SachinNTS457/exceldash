@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ExcelDash Pro — Power BI Style Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f0f2f7;--surface:#fff;--s2:#f8f9fb;--border:#e2e6ea;
+  --primary:#4f46e5;--pl:#eef2ff;--pd:#3730a3;
+  --text:#1a1d23;--muted:#6b7280;--muted2:#9ca3af;
+  --success:#16a34a;--sbg:#dcfce7;
+  --danger:#dc2626;--dbg:#fee2e2;
+  --warning:#d97706;--wbg:#fef3c7;
+  --info:#0284c7;--ibg:#e0f2fe;
+  --purple:#7c3aed;--pbg:#ede9fe;
+  --sidebar:220px;--top:54px;
+  --r:8px;--rl:12px;--rxl:16px;
+  --sh:0 1px 3px rgba(0,0,0,.08);
+  --shm:0 4px 12px rgba(0,0,0,.1);
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:13px;line-height:1.5;min-height:100vh}
+
+/* LOGIN */
+.lscreen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#eef2ff,#f0f2f7,#e0e7ff)}
+.lcard{background:var(--surface);border-radius:var(--rxl);border:1px solid var(--border);padding:34px 30px;width:390px;box-shadow:var(--shm)}
+.llogo{width:50px;height:50px;background:var(--primary);border-radius:13px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;font-weight:700;margin:0 auto 12px}
+.ltitle{font-size:21px;font-weight:700;text-align:center;margin-bottom:3px}
+.lsub{font-size:13px;color:var(--muted);text-align:center;margin-bottom:22px}
+.il{font-size:11px;font-weight:600;color:var(--muted);margin-bottom:4px;display:block}
+.inp{width:100%;padding:8px 11px;border:1.5px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--text);outline:none;transition:border .15s}
+.inp:focus{border-color:var(--primary)}
+select.inp{cursor:pointer}
+.ig{margin-bottom:12px}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:var(--r);font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;border:none;transition:all .15s;user-select:none}
+.bp{background:var(--primary);color:#fff}.bp:hover{background:var(--pd)}
+.bo{background:var(--surface);color:var(--text);border:1.5px solid var(--border)}.bo:hover{background:var(--s2)}
+.bsm{padding:5px 10px;font-size:12px}
+.bd{background:var(--dbg);color:var(--danger)}.bd:hover{background:#fecaca}
+.bs{background:var(--sbg);color:var(--success)}
+.lerr{color:var(--danger);font-size:12px;margin-top:5px;display:none;text-align:center}
+.ldemo{margin-top:14px;padding:10px 12px;background:var(--s2);border-radius:var(--r);font-size:11px;color:var(--muted);line-height:1.9;text-align:center}
+.pbar{height:3px;background:#e5e7eb;border-radius:2px;overflow:hidden;margin-top:10px;display:none}
+.pfill{height:100%;background:var(--primary);animation:ld 1.2s linear infinite}
+@keyframes ld{0%{width:0;margin-left:0}50%{width:60%;margin-left:20%}100%{width:0;margin-left:100%}}
+
+/* APP */
+.app{display:flex;min-height:100vh}
+.sidebar{width:var(--sidebar);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100}
+.sblogo{padding:14px 15px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px;flex-shrink:0}
+.lico{width:32px;height:32px;background:var(--primary);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;font-weight:700}
+.sbnav{flex:1;overflow-y:auto;padding:7px}
+.nsec{font-size:10px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:1px;padding:11px 8px 4px}
+.ni{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:var(--r);cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;margin-bottom:2px;transition:all .15s;user-select:none}
+.ni:hover{background:var(--s2);color:var(--text)}
+.ni.active{background:var(--pl);color:var(--primary)}
+.nico{font-size:15px;min-width:18px;text-align:center}
+.sbfoot{padding:10px;border-top:1px solid var(--border)}
+.ucard{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:var(--r);cursor:pointer;transition:background .15s}
+.ucard:hover{background:var(--s2)}
+.av{width:30px;height:30px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.main{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 18px;height:var(--top);display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:50}
+.tbtitle{font-size:14px;font-weight:700;flex:1}
+.tbsub{font-size:11px;color:var(--muted);font-weight:400;margin-left:6px}
+.tgl{position:relative;width:34px;height:19px;cursor:pointer}
+.tgl input{opacity:0;width:0;height:0}
+.tslider{position:absolute;inset:0;background:#d1d5db;border-radius:20px;transition:.25s}
+.tslider:before{content:'';position:absolute;width:13px;height:13px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.25s}
+.tgl input:checked+.tslider{background:var(--primary)}
+.tgl input:checked+.tslider:before{transform:translateX(15px)}
+.content{padding:18px;flex:1}
+.page{display:none}.page.active{display:block}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:16px;box-shadow:var(--sh)}
+.ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.ct{font-size:14px;font-weight:700}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
+.bbl{background:var(--ibg);color:var(--info)}
+.bgr{background:var(--sbg);color:var(--success)}
+.bam{background:var(--wbg);color:var(--warning)}
+.brd{background:var(--dbg);color:var(--danger)}
+.bpu{background:var(--pbg);color:var(--purple)}
+.bgr2{background:#f3f4f6;color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:7px 9px;font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid var(--border);background:var(--s2);white-space:nowrap}
+td{padding:7px 9px;border-bottom:1px solid #f3f4f6;vertical-align:middle}
+tr:last-child td{border:none}
+tbody tr:hover td{background:#fafbfc}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:none;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--surface);border-radius:var(--rxl);padding:22px;max-width:480px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.18);max-height:90vh;overflow-y:auto}
+.notify{position:fixed;top:14px;right:14px;background:#1a1d23;color:#fff;padding:9px 16px;border-radius:var(--r);font-size:13px;font-weight:500;z-index:999;opacity:0;transform:translateY(-8px);transition:all .25s;pointer-events:none;box-shadow:var(--shm)}
+.notify.show{opacity:1;transform:translateY(0)}
+.empty{text-align:center;padding:30px 20px;color:var(--muted)}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:3px}
+.spin{width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:sp .6s linear infinite;display:inline-block}
+@keyframes sp{to{transform:rotate(360deg)}}
+.ldrow{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px;padding:18px}
+
+/* UPLOAD ZONE */
+.uz{border:2px dashed var(--border);border-radius:var(--rl);padding:28px 18px;text-align:center;cursor:pointer;transition:all .2s;background:var(--s2)}
+.uz:hover,.uz.drag{border-color:var(--primary);background:var(--pl)}
+.uz input{display:none}
+
+/* KPI CARDS */
+.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:14px 16px;box-shadow:var(--sh);position:relative;overflow:hidden}
+.kpi-label{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.kpi-value{font-size:24px;font-weight:700;line-height:1;margin-bottom:4px;color:var(--text)}
+.kpi-sub{font-size:11px;color:var(--muted)}
+.kpi-icon{position:absolute;top:12px;right:14px;font-size:22px;opacity:.25}
+.kpi-bar{height:3px;background:#e5e7eb;border-radius:2px;margin-top:8px;overflow:hidden}
+.kpi-fill{height:100%;border-radius:2px;background:var(--primary)}
+.kpi-card.blue .kpi-fill{background:#3b82f6}
+.kpi-card.green .kpi-fill{background:#10b981}
+.kpi-card.amber .kpi-fill{background:#f59e0b}
+.kpi-card.red .kpi-fill{background:#ef4444}
+.kpi-card.purple .kpi-fill{background:#8b5cf6}
+
+/* SLICER */
+.slicer-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:14px;margin-bottom:14px;box-shadow:var(--sh)}
+.slicer-title{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.slicer-row{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.slicer-item{display:flex;flex-direction:column;gap:4px;min-width:150px;flex:1}
+.slicer-label{font-size:11px;font-weight:600;color:var(--muted)}
+.slice-chips{display:flex;flex-wrap:wrap;gap:4px;max-height:80px;overflow-y:auto}
+.chip{padding:3px 9px;border-radius:20px;font-size:11px;font-weight:500;cursor:pointer;border:1.5px solid var(--border);background:var(--surface);color:var(--muted);transition:all .15s;user-select:none}
+.chip.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.chip.all{background:var(--pl);color:var(--primary);border-color:var(--primary)}
+
+/* CHART BUILDER */
+.cb-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:16px;box-shadow:var(--sh)}
+.cb-section{margin-bottom:14px}
+.cb-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.agg-btns{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}
+.agg-btn{padding:4px 10px;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:var(--surface);color:var(--muted);transition:all .15s}
+.agg-btn.active{background:var(--primary-light,#eef2ff);color:var(--primary);border-color:var(--primary)}
+.ct-btns{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+.ct-btn{padding:4px 10px;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:var(--surface);color:var(--muted);transition:all .15s}
+.ct-btn.active{background:var(--primary-light,#eef2ff);color:var(--primary);border-color:var(--primary)}
+.sort-row{display:flex;gap:6px;margin-bottom:8px}
+.sort-btn{padding:4px 10px;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:var(--surface);color:var(--muted);transition:all .15s;flex:1;text-align:center}
+.sort-btn.active{background:var(--pl);color:var(--primary);border-color:var(--primary)}
+.chart-wrap{position:relative;height:300px;margin-top:10px}
+.chart-container-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:16px;box-shadow:var(--sh);margin-bottom:14px}
+.tbl-scroll{overflow-x:auto;max-height:220px;overflow-y:auto}
+
+/* FORMULA BUILDER */
+.formula-box{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;font-family:'DM Mono',monospace;font-size:12px;color:var(--text);margin-top:8px;min-height:36px}
+.formula-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
+.fc{padding:4px 10px;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;background:var(--pl);color:var(--primary);border:1px solid #c7d2fe;transition:all .15s}
+.fc:hover{background:var(--primary);color:#fff}
+
+/* PAGE LIST ITEM */
+.pli{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:11px 13px;display:flex;align-items:center;gap:9px;margin-bottom:7px;transition:box-shadow .15s;cursor:pointer}
+.pli:hover{box-shadow:var(--shm)}
+
+/* how-box */
+.how-box{background:linear-gradient(135deg,#eef2ff,#e0e7ff);border:1.5px solid #c7d2fe;border-radius:var(--rl);padding:16px}
+.how-step{display:flex;align-items:flex-start;gap:9px;margin-bottom:9px;font-size:12px;color:#3730a3;line-height:1.6}
+.how-num{min-width:20px;height:20px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:1px}
+
+.source-info{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:9px 13px;display:flex;align-items:center;gap:9px;margin-bottom:13px;font-size:12px;flex-wrap:wrap}
+.dot{width:7px;height:7px;border-radius:50%;background:#10b981;flex-shrink:0}
+.dot.red{background:var(--danger)}
+.stabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px}
+.stab{padding:4px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:var(--surface);color:var(--muted);transition:all .15s}
+.stab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen" class="lscreen">
+  <div class="lcard">
+    <div class="llogo">D</div>
+    <div class="ltitle">ExcelDash Pro</div>
+    <div class="lsub">Power BI Style Dashboard</div>
+    <div class="ig"><label class="il">Email</label><input class="inp" id="lemail" type="email" placeholder="you@company.com" autofocus/></div>
+    <div class="ig"><label class="il">Password</label><input class="inp" id="lpass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+    <div class="lerr" id="lerr">❌ Invalid email or password.</div>
+    <button class="btn bp" style="width:100%;justify-content:center;padding:9px;margin-top:4px" onclick="doLogin()">Sign In →</button>
+    <div class="pbar" id="lprog"><div class="pfill"></div></div>
+    <div class="ldemo"><b>Admin:</b> admin@demo.com / admin123 &nbsp;|&nbsp; <b>User:</b> user@demo.com / user123</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="dashApp" class="app" style="display:none">
+  <aside class="sidebar">
+    <div class="sblogo">
+      <div class="lico">D</div>
+      <div><div style="font-size:14px;font-weight:700">ExcelDash Pro</div><div style="font-size:10px;color:var(--muted)">Power BI Style</div></div>
+    </div>
+    <nav class="sbnav">
+      <div class="nsec">Main</div>
+      <div class="ni active" onclick="showPage('home',this)"><span class="nico">🏠</span> Home</div>
+      <div class="nsec">Data Pages</div>
+      <div id="dynPages"></div>
+      <div class="ni" onclick="showPage('addPage',this)"><span class="nico">➕</span> Add New Page</div>
+      <div id="adminNav" style="display:none">
+        <div class="nsec">Admin</div>
+        <div class="ni" onclick="showPage('adminUsers',this)"><span class="nico">👥</span> Manage Users</div>
+      </div>
+    </nav>
+    <div class="sbfoot">
+      <div class="ucard" onclick="logout()">
+        <div class="av" id="sbAv">U</div>
+        <div><div style="font-size:13px;font-weight:600" id="sbName">User</div><div style="font-size:11px;color:var(--muted)" id="sbRole">Member</div></div>
+        <span style="margin-left:auto;font-size:13px;color:var(--muted)">⬅</span>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="tbtitle" id="tbTitle">Home <span class="tbsub" id="tbSub"></span></div>
+      <span style="font-size:11px;color:var(--muted)" id="lastRef"></span>
+      <button class="btn bo bsm" onclick="manualRefresh()">🔄 Refresh</button>
+      <label class="tgl"><input type="checkbox" id="autoTgl" onchange="toggleAuto()"/><span class="tslider"></span></label>
+      <span style="font-size:11px;color:var(--muted)">Auto</span>
+    </div>
+
+    <div class="content">
+
+      <!-- HOME -->
+      <div class="page active" id="page-home">
+        <div class="g4" style="margin-bottom:16px">
+          <div class="kpi-card blue"><div class="kpi-icon">📄</div><div class="kpi-label">Pages</div><div class="kpi-value" id="st-pg">0</div><div class="kpi-sub" id="st-pg-s">No pages</div><div class="kpi-bar"><div class="kpi-fill" id="kf-pg" style="width:0%"></div></div></div>
+          <div class="kpi-card green"><div class="kpi-icon">📁</div><div class="kpi-label">Files Loaded</div><div class="kpi-value" id="st-fl">0</div><div class="kpi-sub">Excel files</div><div class="kpi-bar"><div class="kpi-fill" id="kf-fl" style="width:0%"></div></div></div>
+          <div class="kpi-card amber"><div class="kpi-icon">📊</div><div class="kpi-label">Charts Built</div><div class="kpi-value" id="st-ch">0</div><div class="kpi-sub">Interactive</div><div class="kpi-bar"><div class="kpi-fill" id="kf-ch" style="width:0%"></div></div></div>
+          <div class="kpi-card purple"><div class="kpi-icon">👥</div><div class="kpi-label">Users</div><div class="kpi-value" id="st-us">1</div><div class="kpi-sub" id="st-us-s">Members</div><div class="kpi-bar"><div class="kpi-fill" id="kf-us" style="width:0%"></div></div></div>
+        </div>
+        <div class="g2">
+          <div class="card">
+            <div class="ch"><div class="ct">📊 Your Data Pages</div><button class="btn bo bsm" onclick="showPage('addPage')">+ Add Page</button></div>
+            <div id="homePgList"><div class="empty"><div style="font-size:28px;margin-bottom:8px">📄</div><div>No pages yet. Add your first Excel data page.</div></div></div>
+          </div>
+          <div class="how-box">
+            <div style="font-size:13px;font-weight:700;color:var(--pd);margin-bottom:10px">📌 How to use ExcelDash Pro</div>
+            <div class="how-step"><div class="how-num">1</div><div>Click <b>Add New Page</b> and upload your Excel (.xlsx/.xls/.csv)</div></div>
+            <div class="how-step"><div class="how-num">2</div><div>All sheets load automatically — switch between sheet tabs</div></div>
+            <div class="how-step"><div class="how-num">3</div><div>Use <b>Slicers</b> to filter data by any column value</div></div>
+            <div class="how-step"><div class="how-num">4</div><div>Build charts with <b>aggregations</b>: Sum, Count, Avg, Min, Max, %</div></div>
+            <div class="how-step"><div class="how-num">5</div><div>Set up <b>KPI cards</b> and use <b>Formula Builder</b> for custom metrics</div></div>
+            <div style="margin-top:10px;padding:8px 10px;background:rgba(255,255,255,.6);border-radius:var(--r);font-size:11px;color:#3730a3">
+              💡 Download from OneDrive → Upload here → Full Power BI style dashboard!
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADD PAGE -->
+      <div class="page" id="page-addPage">
+        <div style="margin-bottom:16px"><div style="font-size:16px;font-weight:700">Add New Data Page</div><div style="font-size:12px;color:var(--muted);margin-top:2px">Upload your Excel file to create a new dashboard page</div></div>
+        <div style="max-width:600px">
+          <div class="card" style="margin-bottom:14px">
+            <div class="ig"><label class="il">Page Name *</label><input class="inp" id="np-name" placeholder="e.g. Resource Allocation, Sales Report, HR Data"/></div>
+            <div class="ig"><label class="il">Page Icon</label>
+              <select class="inp" id="np-icon">
+                <option>📊</option><option>📈</option><option>📉</option><option>💰</option>
+                <option>👥</option><option>📦</option><option>🏭</option><option>🗂️</option><option>📋</option>
+              </select>
+            </div>
+          </div>
+          <div class="card">
+            <div class="ct" style="margin-bottom:12px">📁 Upload Excel / CSV File</div>
+            <div class="uz" id="uploadZone" onclick="document.getElementById('fileInput').click()"
+              ondragover="event.preventDefault();this.classList.add('drag')"
+              ondragleave="this.classList.remove('drag')"
+              ondrop="handleDrop(event)">
+              <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" onchange="handleFile(event)"/>
+              <div style="font-size:32px;margin-bottom:8px">📂</div>
+              <div style="font-size:14px;font-weight:600;margin-bottom:3px">Click to select or drag & drop</div>
+              <div style="font-size:12px;color:var(--muted)">Supports .xlsx, .xls, .csv files</div>
+            </div>
+            <div id="fileStatus" style="margin-top:9px;font-size:13px;color:var(--muted)"></div>
+            <div id="sheetSel" style="display:none;margin-top:11px">
+              <label class="il">Select Sheet to Preview</label>
+              <select class="inp" id="sheetSelect" onchange="previewSheet()"></select>
+            </div>
+            <div id="previewArea" style="margin-top:11px"></div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:13px">
+            <button class="btn bp" onclick="addPage()">➕ Create Page</button>
+            <button class="btn bo" onclick="showPage('home')">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADMIN -->
+      <div class="page" id="page-adminUsers">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div style="font-size:16px;font-weight:700">User Management</div>
+          <button class="btn bp bsm" onclick="openAddUser()">+ Add User</button>
+        </div>
+        <div class="card"><div style="overflow-x:auto"><table>
+          <thead><tr><th>User</th><th>Email</th><th>Role</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody id="usersTbl"></tbody>
+        </table></div></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ADD USER MODAL -->
+<div class="modal-bg" id="addUserModal">
+  <div class="modal">
+    <div style="font-size:15px;font-weight:700;margin-bottom:14px">➕ Add New User</div>
+    <div class="ig"><label class="il">Full Name</label><input class="inp" id="nu-name" placeholder="Jane Doe"/></div>
+    <div class="ig"><label class="il">Email</label><input class="inp" id="nu-email" type="email" placeholder="jane@company.com"/></div>
+    <div class="ig"><label class="il">Password</label><input class="inp" id="nu-pass" type="password" placeholder="Set password"/></div>
+    <div class="ig"><label class="il">Role</label><select class="inp" id="nu-role"><option value="user">User</option><option value="admin">Admin</option></select></div>
+    <div style="display:flex;gap:8px;margin-top:6px">
+      <button class="btn bp" onclick="createUser()">Create</button>
+      <button class="btn bo" onclick="closeModal('addUserModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- KPI CONFIG MODAL -->
+<div class="modal-bg" id="kpiModal">
+  <div class="modal">
+    <div style="font-size:15px;font-weight:700;margin-bottom:14px">📊 Add KPI Card</div>
+    <div class="ig"><label class="il">KPI Label</label><input class="inp" id="kpi-label" placeholder="e.g. Total Employees"/></div>
+    <div class="ig"><label class="il">Column</label><select class="inp" id="kpi-col"></select></div>
+    <div class="ig"><label class="il">Aggregation</label>
+      <select class="inp" id="kpi-agg">
+        <option value="sum">Sum</option><option value="count">Count</option>
+        <option value="avg">Average</option><option value="min">Min</option>
+        <option value="max">Max</option><option value="countd">Count Distinct</option>
+      </select>
+    </div>
+    <div class="ig"><label class="il">Color</label>
+      <select class="inp" id="kpi-color">
+        <option value="blue">Blue</option><option value="green">Green</option>
+        <option value="amber">Amber</option><option value="red">Red</option><option value="purple">Purple</option>
+      </select>
+    </div>
+    <div class="ig"><label class="il">Icon (emoji)</label><input class="inp" id="kpi-icon" placeholder="e.g. 👥 💰 📦"/></div>
+    <div style="display:flex;gap:8px;margin-top:6px">
+      <button class="btn bp" onclick="addKPICard()">Add KPI</button>
+      <button class="btn bo" onclick="closeModal('kpiModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="notify" id="notify"></div>
+
+<script>
+// ══════════ STATE ══════════
+const DEF_USERS=[
+  {id:'u1',name:'Admin Demo',email:'admin@demo.com',pass:'admin123',role:'admin',pages:'all',active:true},
+  {id:'u2',name:'User Demo',email:'user@demo.com',pass:'user123',role:'user',pages:[],active:true}
+];
+let S={
+  user:null,
+  users:lsGet('ed_users',DEF_USERS),
+  pages:lsGet('ed_pages',[]),
+  fd:{},        // fileData: pid->{workbook,parsedSheets}
+  charts:{},    // pid->Chart instance
+  chartCount:0,
+  kpis:{},      // pid->[kpi configs]
+  slicers:{},   // pid->{colName:[selected values]}
+  sortState:{}, // pid->{dir:'asc'|'desc'}
+  aggState:{},  // pid->'sum'|'count'|'avg'|'min'|'max'|'pct'
+  ctState:{},   // pid->chartType
+  autoTimer:null,
+  upload:null,  // temp upload
+  kpiPid:null
+};
+function lsGet(k,d){try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}}
+function lsSave(){localStorage.setItem('ed_users',JSON.stringify(S.users));localStorage.setItem('ed_pages',JSON.stringify(S.pages))}
+
+// ══════════ NOTIFY ══════════
+function notify(msg,type='info'){
+  const n=document.getElementById('notify');
+  n.textContent=msg;
+  n.style.background=type==='error'?'#dc2626':type==='success'?'#16a34a':'#1a1d23';
+  n.classList.add('show');setTimeout(()=>n.classList.remove('show'),3000);
+}
+
+// ══════════ LOGIN ══════════
+function doLogin(){
+  const email=document.getElementById('lemail').value.trim();
+  const pass=document.getElementById('lpass').value;
+  const u=S.users.find(x=>x.email===email&&x.pass===pass&&x.active);
+  if(!u){document.getElementById('lerr').style.display='block';return;}
+  document.getElementById('lerr').style.display='none';
+  document.getElementById('lprog').style.display='block';
+  setTimeout(()=>{S.user=u;document.getElementById('loginScreen').style.display='none';document.getElementById('dashApp').style.display='flex';initApp();},700);
+}
+function logout(){
+  S.user=null;clearTimer();
+  document.getElementById('dashApp').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('lprog').style.display='none';
+  document.getElementById('autoTgl').checked=false;
+}
+
+// ══════════ INIT ══════════
+function initApp(){
+  const u=S.user;
+  document.getElementById('sbAv').textContent=u.name[0].toUpperCase();
+  document.getElementById('sbName').textContent=u.name;
+  document.getElementById('sbRole').textContent=u.role==='admin'?'Administrator':'Member';
+  document.getElementById('adminNav').style.display=u.role==='admin'?'block':'none';
+  rebuildNav();showPage('home');updateStats();renderUsers();
+}
+function myPages(){
+  const u=S.user;if(!u)return[];
+  if(u.role==='admin'||u.pages==='all')return S.pages;
+  return S.pages.filter(p=>u.pages.includes(p.id));
+}
+function rebuildNav(){
+  const c=document.getElementById('dynPages');c.innerHTML='';
+  myPages().forEach(p=>{
+    const el=document.createElement('div');
+    el.className='ni';el.dataset.pid=p.id;
+    el.innerHTML=`<span class="nico">${p.icon||'📊'}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${p.name}</span>`;
+    el.onclick=()=>{openDataPage(p.id);setActive(el);};
+    c.appendChild(el);
+  });
+}
+function setActive(el){document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));el.classList.add('active');}
+
+// ══════════ PAGE ROUTING ══════════
+function showPage(id,navEl){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const pg=document.getElementById('page-'+id);if(pg)pg.classList.add('active');
+  if(navEl)setActive(navEl);
+  const titles={home:'🏠 Home',addPage:'➕ Add New Page',adminUsers:'👥 Users'};
+  document.getElementById('tbTitle').innerHTML=(titles[id]||id)+'<span class="tbsub" id="tbSub"></span>';
+  if(id==='home'){updateStats();renderHomePgList();}
+  if(id==='addPage')resetAddPage();
+}
+function updateStats(){
+  const pg=myPages();
+  document.getElementById('st-pg').textContent=pg.length;
+  document.getElementById('st-pg-s').textContent=pg.length?pg.length+' active':'No pages';
+  document.getElementById('st-fl').textContent=Object.keys(S.fd).length;
+  document.getElementById('st-ch').textContent=S.chartCount;
+  document.getElementById('st-us').textContent=S.users.length;
+  document.getElementById('st-us-s').textContent=S.user.role==='admin'?'Admin':'Member';
+  ['pg','fl','ch','us'].forEach((k,i)=>{
+    const vals=[pg.length,Object.keys(S.fd).length,S.chartCount,S.users.length];
+    const max=[10,10,20,20];
+    const el=document.getElementById('kf-'+k);
+    if(el)el.style.width=Math.min(100,Math.round(vals[i]/max[i]*100))+'%';
+  });
+}
+function renderHomePgList(){
+  const pg=myPages();
+  const c=document.getElementById('homePgList');
+  if(!pg.length){c.innerHTML='<div class="empty"><div style="font-size:28px;margin-bottom:8px">📄</div><div>No pages yet. Add your first Excel data page.</div></div>';return;}
+  c.innerHTML=pg.map(p=>`
+    <div class="pli" onclick="openDataPage('${p.id}');setActive(document.querySelector('[data-pid=\\'${p.id}\\']'))">
+      <div style="width:34px;height:34px;border-radius:var(--r);background:var(--pl);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">${p.icon||'📊'}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600">${p.name}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:1px">${p.filename||'Excel File'} · ${(p.sheetNames||[]).length} sheet(s)</div>
+      </div>
+      <button class="btn bo bsm" onclick="event.stopPropagation();openDataPage('${p.id}')">Open →</button>
+      <button class="btn bd bsm" onclick="event.stopPropagation();deletePage('${p.id}')">🗑</button>
+    </div>`).join('');
+}
+function deletePage(pid){
+  if(!confirm('Delete this page?'))return;
+  S.pages=S.pages.filter(p=>p.id!==pid);
+  delete S.fd[pid];delete S.charts[pid];delete S.kpis[pid];delete S.slicers[pid];
+  const dp=document.getElementById('dp-'+pid);if(dp)dp.remove();
+  lsSave();rebuildNav();updateStats();renderHomePgList();showPage('home');
+  notify('Page deleted');
+}
+
+// ══════════ ADD PAGE ══════════
+function resetAddPage(){
+  S.upload=null;
+  document.getElementById('np-name').value='';
+  document.getElementById('fileStatus').textContent='';
+  document.getElementById('sheetSel').style.display='none';
+  document.getElementById('previewArea').innerHTML='';
+}
+function handleDrop(e){e.preventDefault();document.getElementById('uploadZone').classList.remove('drag');const f=e.dataTransfer.files[0];if(f)processFile(f);}
+function handleFile(e){const f=e.target.files[0];if(f)processFile(f);}
+function processFile(file){
+  const ext=file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+  if(!['.xlsx','.xls','.csv'].includes(ext)){notify('Please upload .xlsx, .xls or .csv','error');return;}
+  document.getElementById('fileStatus').innerHTML='<div class="ldrow"><div class="spin"></div> Reading '+file.name+'...</div>';
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
+      S.upload={workbook:wb,filename:file.name,sheetNames:wb.SheetNames,parsedSheets:{}};
+      document.getElementById('fileStatus').innerHTML='<span style="color:var(--success)">✅ '+file.name+' loaded! ('+wb.SheetNames.length+' sheet'+(wb.SheetNames.length>1?'s':'')+')</span>';
+      if(!document.getElementById('np-name').value)document.getElementById('np-name').value=file.name.replace(/\.(xlsx|xls|csv)$/i,'');
+      const sel=document.getElementById('sheetSelect');
+      sel.innerHTML=wb.SheetNames.map(s=>`<option value="${s}">${s}</option>`).join('');
+      document.getElementById('sheetSel').style.display='block';
+      previewSheet();
+      notify('Excel loaded ✓','success');
+    }catch(err){document.getElementById('fileStatus').innerHTML='<span style="color:var(--danger)">❌ Error: '+err.message+'</span>';}
+  };
+  reader.readAsArrayBuffer(file);
+}
+function previewSheet(){
+  if(!S.upload)return;
+  const sn=document.getElementById('sheetSelect').value;
+  const parsed=parseSheet(S.upload.workbook,sn);
+  S.upload.parsedSheets[sn]=parsed;
+  let html='<div class="tbl-scroll"><table><thead><tr>'+parsed.headers.map(h=>`<th>${h}</th>`).join('')+'</tr></thead><tbody>';
+  parsed.rows.slice(0,6).forEach(r=>{html+='<tr>'+parsed.headers.map((_,i)=>`<td>${r[i]!==undefined&&r[i]!==''?r[i]:''}</td>`).join('')+'</tr>';});
+  html+='</tbody></table></div>';
+  if(parsed.rows.length>6)html+=`<div style="font-size:11px;color:var(--muted);padding:5px 0;text-align:center">Showing 6 of ${parsed.rows.length} rows</div>`;
+  document.getElementById('previewArea').innerHTML=html;
+}
+function parseSheet(wb,sn){
+  const ws=wb.Sheets[sn];
+  const raw=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+  let hr=0;
+  for(let i=0;i<Math.min(5,raw.length);i++){if(raw[i].some(c=>c!=='')){{hr=i;break;}}}
+  const headers=raw[hr].map((h,i)=>String(h||'Col'+(i+1)).trim());
+  const rows=raw.slice(hr+1).filter(r=>r.some(c=>c!==''));
+  return{headers,rows};
+}
+function addPage(){
+  const name=document.getElementById('np-name').value.trim();
+  const icon=document.getElementById('np-icon').value;
+  if(!name){notify('Page name required','error');return;}
+  if(!S.upload){notify('Please upload an Excel file','error');return;}
+  const pid='p'+Date.now();
+  const sn=document.getElementById('sheetSelect').value||S.upload.sheetNames[0];
+  const page={id:pid,name,icon,filename:S.upload.filename,sheetNames:S.upload.sheetNames,activeSheet:sn,createdBy:S.user.id};
+  S.pages.push(page);
+  S.fd[pid]={workbook:S.upload.workbook,parsedSheets:S.upload.parsedSheets||{}};
+  S.kpis[pid]=[];S.slicers[pid]={};S.aggState[pid]='sum';S.ctState[pid]='bar';S.sortState[pid]='none';
+  lsSave();rebuildNav();updateStats();
+  S.upload=null;
+  notify(`Page "${name}" created! ✓`,'success');
+  showPage('home');
+}
+
+// ══════════ DATA PAGE ══════════
+function openDataPage(pid){
+  const p=S.pages.find(x=>x.id===pid);if(!p)return;
+  document.getElementById('tbTitle').innerHTML=`${p.icon||'📊'} ${p.name}<span class="tbsub" id="tbSub"> · ${p.activeSheet||''}</span>`;
+  let pg=document.getElementById('dp-'+pid);
+  if(!pg){pg=buildDPEl(pid);document.querySelector('.content').appendChild(pg);}
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  pg.classList.add('active');
+  loadPageData(pid);
+}
+
+function buildDPEl(pid){
+  const p=S.pages.find(x=>x.id===pid);
+  const div=document.createElement('div');div.className='page';div.id='dp-'+pid;
+  div.innerHTML=`
+    <div class="source-info">
+      <div class="dot" id="dot-${pid}"></div>
+      <span style="font-size:11px;font-weight:600;color:var(--muted)">FILE:</span>
+      <span style="font-size:12px;color:var(--primary)">${p.filename||'Excel File'}</span>
+      <span style="margin-left:auto;font-size:11px;color:var(--muted)" id="ri-${pid}">Loading...</span>
+      <button class="btn bo bsm" onclick="reupload('${pid}')">📁 Re-upload</button>
+      <button class="btn bp bsm" onclick="openKPIModal('${pid}')">+ KPI</button>
+    </div>
+    <div class="stabs" id="tabs-${pid}"></div>
+
+    <!-- KPI ROW -->
+    <div class="g4" id="kpiRow-${pid}" style="margin-bottom:14px"></div>
+
+    <!-- SLICER -->
+    <div class="slicer-panel" id="slicerPanel-${pid}">
+      <div class="slicer-title">🔽 Slicers — Filter Data</div>
+      <div class="slicer-row" id="slicerRow-${pid}"><div style="font-size:12px;color:var(--muted)">Load data to see slicer options</div></div>
+    </div>
+
+    <!-- CHART BUILDER + TABLE -->
+    <div class="g2" style="margin-bottom:14px">
+      <div class="cb-panel">
+        <div class="ct" style="margin-bottom:12px">📊 Chart Builder</div>
+
+        <div class="cb-section">
+          <div class="cb-label">Group By (X Axis)</div>
+          <select class="inp" id="x-${pid}" style="font-size:12px;margin-bottom:0"></select>
+        </div>
+
+        <div class="cb-section">
+          <div class="cb-label">Values (Y Axis)</div>
+          <select class="inp" id="y-${pid}" style="font-size:12px" multiple size="3"></select>
+          <div style="font-size:10px;color:var(--muted);margin-top:3px">Hold Ctrl to select multiple columns</div>
+        </div>
+
+        <div class="cb-section">
+          <div class="cb-label">Aggregation</div>
+          <div class="agg-btns" id="agg-${pid}">
+            ${['Sum','Count','Avg','Min','Max','%'].map((a,i)=>`<button class="agg-btn${i===0?' active':''}" onclick="setAgg('${pid}','${a.toLowerCase()}',this)">${a}</button>`).join('')}
+          </div>
+        </div>
+
+        <div class="cb-section">
+          <div class="cb-label">Sort</div>
+          <div class="sort-row">
+            <div class="sort-btn active" id="sort-none-${pid}" onclick="setSort('${pid}','none',this)">Default</div>
+            <div class="sort-btn" id="sort-asc-${pid}" onclick="setSort('${pid}','asc',this)">↑ Ascending</div>
+            <div class="sort-btn" id="sort-desc-${pid}" onclick="setSort('${pid}','desc',this)">↓ Descending</div>
+          </div>
+        </div>
+
+        <div class="cb-section">
+          <div class="cb-label">Chart Type</div>
+          <div class="ct-btns" id="ct-${pid}">
+            ${['Bar','Line','Pie','Doughnut','Area','Radar','PolarArea','Scatter'].map((t,i)=>`<button class="ct-btn${i===0?' active':''}" onclick="setCT('${pid}','${t}',this)">${t}</button>`).join('')}
+          </div>
+        </div>
+
+        <button class="btn bp" style="width:100%;justify-content:center" onclick="buildChart('${pid}')">📊 Build Chart</button>
+
+        <!-- FORMULA BUILDER -->
+        <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px">
+          <div class="cb-label">🧮 Formula Builder</div>
+          <div class="formula-chips" id="fcChips-${pid}"></div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:6px">
+            ${['SUM','COUNT','AVG','MIN','MAX','IF','CONCAT','ROUND'].map(f=>`<div class="fc" onclick="insertFormula('${pid}','${f}()')">${f}</div>`).join('')}
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Custom formula (e.g. =SUM(Sales)/COUNT(Emp))</div>
+          <input class="inp" id="formula-${pid}" placeholder="=SUM(Column1)/COUNT(Column2)" style="font-family:'DM Mono',monospace;font-size:12px"/>
+          <button class="btn bp bsm" style="margin-top:6px;width:100%;justify-content:center" onclick="applyFormula('${pid}')">Apply Formula</button>
+          <div id="formulaResult-${pid}" style="margin-top:6px;font-size:13px;font-weight:600;color:var(--primary)"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card" style="margin-bottom:14px">
+          <div class="ch">
+            <div class="ct">📋 Data Preview</div>
+            <div style="font-size:11px;color:var(--muted)" id="range-info-${pid}"></div>
+          </div>
+          <div id="tbl-${pid}"><div class="ldrow"><div class="spin"></div> Loading...</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHART OUTPUT -->
+    <div id="chartCards-${pid}"></div>
+
+    <input type="file" id="reup-${pid}" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleReup(event,'${pid}')"/>
+  `;
+  return div;
+}
+
+// ══════════ LOAD & DISPLAY DATA ══════════
+function loadPageData(pid){
+  const fd=S.fd[pid];
+  const p=S.pages.find(x=>x.id===pid);if(!p)return;
+  if(fd&&fd.workbook){
+    buildSheetTabs(pid);
+    showSheetData(pid,p.activeSheet||p.sheetNames[0]);
+  } else {
+    document.getElementById(`tbl-${pid}`).innerHTML=`
+      <div style="text-align:center;padding:28px 16px">
+        <div style="font-size:26px;margin-bottom:8px">📁</div>
+        <div style="font-size:14px;font-weight:600;margin-bottom:6px">File not in memory</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Excel files need re-uploading after page refresh. Please re-upload <b>${p.filename||'your file'}</b>.</div>
+        <button class="btn bp" onclick="reupload('${pid}')">📁 Re-upload File</button>
+      </div>`;
+    document.getElementById(`dot-${pid}`).className='dot red';
+    document.getElementById(`ri-${pid}`).textContent='Not loaded';
+  }
+}
+function buildSheetTabs(pid){
+  const p=S.pages.find(x=>x.id===pid);
+  const c=document.getElementById(`tabs-${pid}`);if(!c)return;
+  c.innerHTML=(p.sheetNames||[]).map(s=>
+    `<div class="stab${s===(p.activeSheet||p.sheetNames[0])?' active':''}" onclick="switchSheet('${pid}','${s}',this)">${s}</div>`
+  ).join('');
+}
+function switchSheet(pid,sn,el){
+  const p=S.pages.find(x=>x.id===pid);p.activeSheet=sn;
+  document.querySelectorAll(`#tabs-${pid} .stab`).forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  S.slicers[pid]={};
+  showSheetData(pid,sn);
+}
+function getParsed(pid,sn){
+  const fd=S.fd[pid];if(!fd)return null;
+  if(fd.parsedSheets&&fd.parsedSheets[sn])return fd.parsedSheets[sn];
+  const parsed=parseSheet(fd.workbook,sn);
+  fd.parsedSheets=fd.parsedSheets||{};
+  fd.parsedSheets[sn]=parsed;
+  return parsed;
+}
+function showSheetData(pid,sn){
+  const parsed=getParsed(pid,sn);if(!parsed)return;
+  renderTable(pid,parsed);
+  populateAxes(pid,parsed);
+  buildSlicers(pid,parsed);
+  renderKPIs(pid,parsed);
+  buildFormulaChips(pid,parsed);
+  const now=new Date().toLocaleTimeString();
+  document.getElementById(`ri-${pid}`).textContent=`${parsed.rows.length} rows × ${parsed.headers.length} cols · ${now}`;
+  document.getElementById(`dot-${pid}`).className='dot';
+  document.getElementById('lastRef').textContent='Updated '+now;
+  notify('Data loaded ✓','success');
+}
+
+function getFilteredRows(pid,parsed){
+  const sl=S.slicers[pid]||{};
+  return parsed.rows.filter(row=>{
+    return Object.keys(sl).every(col=>{
+      const idx=parsed.headers.indexOf(col);
+      if(idx===-1)return true;
+      const selected=sl[col];
+      if(!selected||!selected.length)return true;
+      return selected.includes(String(row[idx]));
+    });
+  });
+}
+
+function renderTable(pid,parsed){
+  const el=document.getElementById(`tbl-${pid}`);if(!el)return;
+  const rows=getFilteredRows(pid,parsed);
+  if(!rows.length){el.innerHTML='<div style="color:var(--muted);font-size:13px;padding:14px">No data matches current filters.</div>';return;}
+  let html='<div class="tbl-scroll"><table><thead><tr>'+parsed.headers.map(h=>`<th>${h}</th>`).join('')+'</tr></thead><tbody>';
+  rows.slice(0,100).forEach(r=>{
+    html+='<tr>'+parsed.headers.map((_,i)=>{
+      const v=r[i]!==undefined&&r[i]!==''?r[i]:'';
+      const isN=typeof v==='number';
+      return`<td style="${isN?'text-align:right;font-family:DM Mono,monospace':''}">${isN?v.toLocaleString():v}</td>`;
+    }).join('')+'</tr>';
+  });
+  html+='</tbody></table></div>';
+  if(rows.length>100)html+=`<div style="font-size:11px;color:var(--muted);padding:5px 0;text-align:center">Showing 100 of ${rows.length} rows</div>`;
+  el.innerHTML=html;
+  document.getElementById(`range-info-${pid}`).textContent=`${rows.length}/${parsed.rows.length} rows`;
+}
+
+function populateAxes(pid,parsed){
+  const x=document.getElementById(`x-${pid}`);
+  const y=document.getElementById(`y-${pid}`);
+  if(!x||!y)return;
+  x.innerHTML=parsed.headers.map((h,i)=>`<option value="${i}">${h}</option>`).join('');
+  // Y: numeric cols selected by default
+  y.innerHTML=parsed.headers.map((h,i)=>{
+    const isNum=parsed.rows.some(r=>typeof r[i]==='number'||(!isNaN(parseFloat(r[i]))&&r[i]!==''));
+    return`<option value="${i}"${isNum?' selected':''}>${h}</option>`;
+  }).join('');
+}
+
+// ══════════ SLICERS ══════════
+function buildSlicers(pid,parsed){
+  const row=document.getElementById(`slicerRow-${pid}`);if(!row)return;
+  // Only categorical (non-numeric) columns as slicer candidates, max 4
+  const catCols=parsed.headers.filter((h,i)=>{
+    const vals=parsed.rows.map(r=>r[i]);
+    const numCount=vals.filter(v=>typeof v==='number'||(!isNaN(parseFloat(v))&&v!=='')).length;
+    return numCount < vals.length*0.5; // mostly non-numeric
+  }).slice(0,4);
+  if(!catCols.length){row.innerHTML='<div style="font-size:12px;color:var(--muted)">No categorical columns found for slicers.</div>';return;}
+  row.innerHTML=catCols.map(col=>{
+    const idx=parsed.headers.indexOf(col);
+    const uniq=[...new Set(parsed.rows.map(r=>String(r[idx])).filter(v=>v&&v!==''))].slice(0,15);
+    return`<div class="slicer-item">
+      <div class="slicer-label">${col}</div>
+      <div class="slice-chips" id="sc-${pid}-${idx}">
+        <div class="chip all active" onclick="slicerAll('${pid}',${idx},'${col}',this)">All</div>
+        ${uniq.map(v=>`<div class="chip" onclick="slicerToggle('${pid}',${idx},'${col}','${v.replace(/'/g,"\\'")}',this)">${v}</div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+function slicerAll(pid,idx,col,el){
+  S.slicers[pid]=S.slicers[pid]||{};
+  delete S.slicers[pid][col];
+  // reset chips
+  document.querySelectorAll(`#sc-${pid}-${idx} .chip`).forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  applySlicerFilter(pid);
+}
+function slicerToggle(pid,idx,col,val,el){
+  S.slicers[pid]=S.slicers[pid]||{};
+  if(!S.slicers[pid][col])S.slicers[pid][col]=[];
+  const arr=S.slicers[pid][col];
+  const i=arr.indexOf(val);
+  if(i===-1)arr.push(val);else arr.splice(i,1);
+  if(!arr.length)delete S.slicers[pid][col];
+  // update All chip
+  const allChip=document.querySelector(`#sc-${pid}-${idx} .chip.all`);
+  if(allChip)allChip.classList.toggle('active',!S.slicers[pid][col]||!S.slicers[pid][col].length);
+  el.classList.toggle('active',i===-1);
+  applySlicerFilter(pid);
+}
+function applySlicerFilter(pid){
+  const p=S.pages.find(x=>x.id===pid);
+  const parsed=getParsed(pid,p.activeSheet);
+  if(!parsed)return;
+  renderTable(pid,parsed);
+  renderKPIs(pid,parsed);
+}
+
+// ══════════ KPI CARDS ══════════
+function openKPIModal(pid){
+  S.kpiPid=pid;
+  const p=S.pages.find(x=>x.id===pid);
+  const parsed=getParsed(pid,p.activeSheet);
+  if(!parsed){notify('Load data first','error');return;}
+  const sel=document.getElementById('kpi-col');
+  sel.innerHTML=parsed.headers.map(h=>`<option value="${h}">${h}</option>`).join('');
+  document.getElementById('kpiModal').classList.add('open');
+}
+function addKPICard(){
+  const pid=S.kpiPid;
+  const label=document.getElementById('kpi-label').value.trim()||document.getElementById('kpi-col').value;
+  const col=document.getElementById('kpi-col').value;
+  const agg=document.getElementById('kpi-agg').value;
+  const color=document.getElementById('kpi-color').value;
+  const icon=document.getElementById('kpi-icon').value||'📊';
+  S.kpis[pid]=S.kpis[pid]||[];
+  S.kpis[pid].push({label,col,agg,color,icon});
+  closeModal('kpiModal');
+  const p=S.pages.find(x=>x.id===pid);
+  const parsed=getParsed(pid,p.activeSheet);
+  renderKPIs(pid,parsed);
+  notify('KPI added ✓','success');
+  document.getElementById('kpi-label').value='';document.getElementById('kpi-icon').value='';
+}
+function aggValue(rows,headers,col,agg){
+  const idx=headers.indexOf(col);if(idx===-1)return 'N/A';
+  const vals=rows.map(r=>r[idx]).filter(v=>v!==''&&v!==undefined&&v!==null);
+  if(agg==='count')return vals.length;
+  if(agg==='countd')return new Set(vals.map(String)).size;
+  const nums=vals.map(v=>parseFloat(v)).filter(v=>!isNaN(v));
+  if(!nums.length)return agg==='count'?vals.length:'N/A';
+  if(agg==='sum')return nums.reduce((a,b)=>a+b,0);
+  if(agg==='avg')return+(nums.reduce((a,b)=>a+b,0)/nums.length).toFixed(2);
+  if(agg==='min')return Math.min(...nums);
+  if(agg==='max')return Math.max(...nums);
+  return 'N/A';
+}
+function fmtVal(v){if(typeof v==='number')return v>=1000?v.toLocaleString():v;return v;}
+function renderKPIs(pid,parsed){
+  const kpis=S.kpis[pid]||[];
+  const el=document.getElementById(`kpiRow-${pid}`);if(!el)return;
+  if(!kpis.length){el.innerHTML='';return;}
+  const filteredRows=getFilteredRows(pid,parsed);
+  el.innerHTML=kpis.map((k,i)=>{
+    const val=aggValue(filteredRows,parsed.headers,k.col,k.agg);
+    const allVal=aggValue(parsed.rows,parsed.headers,k.col,k.agg);
+    const pct=allVal&&typeof allVal==='number'&&allVal>0?Math.min(100,Math.round((typeof val==='number'?val:0)/allVal*100)):100;
+    return`<div class="kpi-card ${k.color||'blue'}">
+      <div class="kpi-icon">${k.icon}</div>
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-value">${fmtVal(val)}</div>
+      <div class="kpi-sub">${k.agg.toUpperCase()} of ${k.col}</div>
+      <div class="kpi-bar"><div class="kpi-fill" style="width:${pct}%"></div></div>
+      <div style="position:absolute;bottom:6px;right:10px;font-size:10px;color:var(--muted)">${pct}% of total</div>
+      <button style="position:absolute;top:6px;left:8px;background:none;border:none;cursor:pointer;font-size:11px;color:var(--muted)" onclick="removeKPI('${pid}',${i})">✕</button>
+    </div>`;
+  }).join('');
+}
+function removeKPI(pid,i){S.kpis[pid].splice(i,1);const p=S.pages.find(x=>x.id===pid);const parsed=getParsed(pid,p.activeSheet);renderKPIs(pid,parsed);}
+
+// ══════════ CHART BUILDER ══════════
+function setAgg(pid,agg,btn){
+  S.aggState[pid]=agg;
+  document.querySelectorAll(`#agg-${pid} .agg-btn`).forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function setCT(pid,type,btn){
+  S.ctState[pid]=type;
+  document.querySelectorAll(`#ct-${pid} .ct-btn`).forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function setSort(pid,dir,btn){
+  S.sortState[pid]=dir;
+  document.querySelectorAll(`#sort-none-${pid},#sort-asc-${pid},#sort-desc-${pid}`).forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function buildChart(pid){
+  const p=S.pages.find(x=>x.id===pid);
+  const parsed=getParsed(pid,p.activeSheet);
+  if(!parsed){notify('Load data first','error');return;}
+  const xEl=document.getElementById(`x-${pid}`);
+  const yEl=document.getElementById(`y-${pid}`);
+  const xIdx=parseInt(xEl.value);
+  const yIdxs=Array.from(yEl.selectedOptions).map(o=>parseInt(o.value)).filter(i=>i!==xIdx);
+  if(!yIdxs.length){notify('Select at least one value column','error');return;}
+
+  const agg=S.aggState[pid]||'sum';
+  const type=S.ctState[pid]||'bar';
+  const sort=S.sortState[pid]||'none';
+  const filteredRows=getFilteredRows(pid,parsed);
+
+  // Group by X axis
+  const xCol=parsed.headers[xIdx];
+  const groups={};
+  filteredRows.forEach(row=>{
+    const key=String(row[xIdx]!==undefined&&row[xIdx]!==''?row[xIdx]:'(blank)');
+    if(!groups[key])groups[key]={};
+    yIdxs.forEach(yi=>{
+      const col=parsed.headers[yi];
+      if(!groups[key][col])groups[key][col]=[];
+      const v=row[yi];
+      const n=parseFloat(v);
+      groups[key][col].push(isNaN(n)?v:n);
+    });
+  });
+
+  // Aggregate
+  function doAgg(vals,agg){
+    const nums=vals.filter(v=>typeof v==='number'&&!isNaN(v));
+    if(agg==='count')return vals.length;
+    if(agg==='countd')return new Set(vals.map(String)).size;
+    if(!nums.length)return 0;
+    if(agg==='sum')return nums.reduce((a,b)=>a+b,0);
+    if(agg==='avg')return+(nums.reduce((a,b)=>a+b,0)/nums.length).toFixed(2);
+    if(agg==='min')return Math.min(...nums);
+    if(agg==='max')return Math.max(...nums);
+    if(agg==='%'){
+      const total=nums.reduce((a,b)=>a+b,0);
+      return total>0?+(nums.reduce((a,b)=>a+b,0)/filteredRows.length).toFixed(2):0;
+    }
+    return nums.reduce((a,b)=>a+b,0);
+  }
+
+  let labels=Object.keys(groups);
+  let dataMap={};
+  yIdxs.forEach(yi=>{
+    const col=parsed.headers[yi];
+    dataMap[col]=labels.map(lbl=>doAgg(groups[lbl][col]||[],agg));
+  });
+
+  // Percentage mode: normalize each label total to 100%
+  if(agg==='%'){
+    labels.forEach((lbl,li)=>{
+      const total=yIdxs.reduce((s,yi)=>s+(dataMap[parsed.headers[yi]][li]||0),0);
+      if(total>0){yIdxs.forEach(yi=>{const col=parsed.headers[yi];dataMap[col][li]=+((dataMap[col][li]/total)*100).toFixed(1);});}
+    });
+  }
+
+  // Sort
+  if(sort!=='none'&&yIdxs.length>0){
+    const firstCol=parsed.headers[yIdxs[0]];
+    const combined=labels.map((lbl,i)=>({lbl,vals:Object.fromEntries(Object.keys(dataMap).map(k=>[k,dataMap[k][i]]))}));
+    combined.sort((a,b)=>sort==='asc'?a.vals[firstCol]-b.vals[firstCol]:b.vals[firstCol]-a.vals[firstCol]);
+    labels=combined.map(x=>x.lbl);
+    Object.keys(dataMap).forEach(col=>{dataMap[col]=combined.map(x=>x.vals[col]);});
+  }
+
+  // Chart type mapping
+  const realType=type.toLowerCase()==='area'?'line':type.toLowerCase();
+  const palette=['#4f46e5','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#ec4899','#84cc16'];
+  const datasets=yIdxs.map((yi,i)=>{
+    const col=parsed.headers[yi];
+    return{
+      label:`${col} (${agg.toUpperCase()})`,
+      data:dataMap[col],
+      backgroundColor:['line','radar'].includes(realType)?palette[i%palette.length]+'33':palette[i%palette.length],
+      borderColor:palette[i%palette.length],
+      borderWidth:2,fill:type.toLowerCase()==='area',tension:.4,
+      pointRadius:3,pointHoverRadius:6
+    };
+  });
+
+  // Create chart card
+  const cid='c'+Date.now();
+  const cc=document.getElementById(`chartCards-${pid}`);
+  const div=document.createElement('div');
+  div.className='chart-container-card';div.id=cid;
+  const isRound=['pie','doughnut','polararea','radar'].includes(realType);
+  const aggLabel=agg==='%'?'% of Total':agg.charAt(0).toUpperCase()+agg.slice(1);
+  div.innerHTML=`
+    <div class="ch">
+      <div>
+        <div class="ct">${p.name} — ${xCol} by ${yIdxs.map(i=>parsed.headers[i]).join(', ')}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Aggregation: ${aggLabel} · Chart: ${type} · Sort: ${sort} · Rows: ${filteredRows.length}</div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="btn bo bsm" onclick="downloadChart('${cid}')">⬇ PNG</button>
+        <button class="btn bd bsm" onclick="document.getElementById('${cid}').remove()">✕</button>
+      </div>
+    </div>
+    <div class="chart-wrap"><canvas id="cv-${cid}"></canvas></div>`;
+  cc.prepend(div);
+
+  if(S.charts[cid])S.charts[cid].destroy();
+  S.charts[cid]=new Chart(document.getElementById(`cv-${cid}`),{
+    type:realType,
+    data:{labels,datasets},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{position:'top',labels:{font:{size:11},boxWidth:13,padding:12}},
+        tooltip:{mode:'index',intersect:false,callbacks:{
+          label:ctx=>`${ctx.dataset.label}: ${typeof ctx.raw==='number'?ctx.raw.toLocaleString():ctx.raw}${agg==='%'?'%':''}`
+        }}
+      },
+      scales:isRound?{}:{
+        x:{grid:{color:'#f1f3f5'},ticks:{font:{size:11},maxRotation:45}},
+        y:{grid:{color:'#f1f3f5'},ticks:{font:{size:11},callback:v=>agg==='%'?v+'%':typeof v==='number'?v.toLocaleString():v}}
+      }
+    }
+  });
+  S.chartCount++;updateStats();
+  div.scrollIntoView({behavior:'smooth',block:'nearest'});
+  notify('Chart built! ✓','success');
+}
+
+function downloadChart(cid){
+  const c=document.getElementById(`cv-${cid}`);if(!c)return;
+  const a=document.createElement('a');a.href=c.toDataURL('image/png');a.download=`chart-${cid}.png`;a.click();
+  notify('PNG saved ✓','success');
+}
+
+// ══════════ FORMULA BUILDER ══════════
+function buildFormulaChips(pid,parsed){
+  const el=document.getElementById(`fcChips-${pid}`);if(!el)return;
+  el.innerHTML=parsed.headers.map(h=>`<div class="fc" onclick="insertColFormula('${pid}','${h.replace(/'/g,"\\'")}')">📌 ${h}</div>`).join('');
+}
+function insertFormula(pid,fn){
+  const el=document.getElementById(`formula-${pid}`);
+  el.value+=(el.value?'':' ')+fn;el.focus();
+}
+function insertColFormula(pid,col){
+  const el=document.getElementById(`formula-${pid}`);
+  el.value+=(el.value?'':'')+`[${col}]`;el.focus();
+}
+function applyFormula(pid){
+  const p=S.pages.find(x=>x.id===pid);
+  const parsed=getParsed(pid,p.activeSheet);
+  const formula=document.getElementById(`formula-${pid}`).value.trim();
+  const el=document.getElementById(`formulaResult-${pid}`);
+  if(!formula||!parsed){el.textContent='';return;}
+  try{
+    // Parse simple formulas: SUM([col]), COUNT([col]), AVG([col]), MIN([col]), MAX([col])
+    const filteredRows=getFilteredRows(pid,parsed);
+    let expr=formula.replace(/^=/,'');
+    // Replace [ColName] with aggregated value
+    expr=expr.replace(/SUM\(\[([^\]]+)\]\)/gi,(m,col)=>{
+      const idx=parsed.headers.indexOf(col);
+      const nums=filteredRows.map(r=>parseFloat(r[idx])).filter(v=>!isNaN(v));
+      return nums.reduce((a,b)=>a+b,0);
+    });
+    expr=expr.replace(/COUNT\(\[([^\]]+)\]\)/gi,(m,col)=>{
+      const idx=parsed.headers.indexOf(col);
+      return filteredRows.filter(r=>r[idx]!==''&&r[idx]!==undefined).length;
+    });
+    expr=expr.replace(/AVG\(\[([^\]]+)\]\)/gi,(m,col)=>{
+      const idx=parsed.headers.indexOf(col);
+      const nums=filteredRows.map(r=>parseFloat(r[idx])).filter(v=>!isNaN(v));
+      return+(nums.reduce((a,b)=>a+b,0)/nums.length).toFixed(4);
+    });
+    expr=expr.replace(/MIN\(\[([^\]]+)\]\)/gi,(m,col)=>{
+      const idx=parsed.headers.indexOf(col);
+      const nums=filteredRows.map(r=>parseFloat(r[idx])).filter(v=>!isNaN(v));
+      return Math.min(...nums);
+    });
+    expr=expr.replace(/MAX\(\[([^\]]+)\]\)/gi,(m,col)=>{
+      const idx=parsed.headers.indexOf(col);
+      const nums=filteredRows.map(r=>parseFloat(r[idx])).filter(v=>!isNaN(v));
+      return Math.max(...nums);
+    });
+    // Safe eval
+    const result=Function('"use strict";return ('+expr+')')();
+    const formatted=typeof result==='number'?result.toLocaleString():result;
+    el.innerHTML=`Result: <span style="color:var(--success)">${formatted}</span>`;
+  }catch(e){el.innerHTML=`<span style="color:var(--danger)">Error: ${e.message}</span>`;}
+}
+
+// ══════════ REFRESH ══════════
+function manualRefresh(){
+  const a=document.querySelector('.page.active');
+  if(a&&a.id.startsWith('dp-')){const pid=a.id.replace('dp-','');loadPageData(pid);}
+  else notify('Refreshed ✓','success');
+}
+function toggleAuto(){
+  clearTimer();
+  if(document.getElementById('autoTgl').checked){
+    S.autoTimer=setInterval(()=>{const a=document.querySelector('.page.active');if(a&&a.id.startsWith('dp-'))loadPageData(a.id.replace('dp-',''));},60000);
+    notify('Auto refresh ON ✓','success');
+  }
+}
+function clearTimer(){if(S.autoTimer){clearInterval(S.autoTimer);S.autoTimer=null;}}
+
+// ══════════ REUPLOAD ══════════
+function reupload(pid){document.getElementById(`reup-${pid}`).click();}
+function handleReup(e,pid){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array'});
+      S.fd[pid]={workbook:wb,parsedSheets:{}};
+      const p=S.pages.find(x=>x.id===pid);
+      p.sheetNames=wb.SheetNames;p.activeSheet=wb.SheetNames[0];p.filename=file.name;
+      lsSave();buildSheetTabs(pid);showSheetData(pid,wb.SheetNames[0]);
+      notify('File re-loaded ✓','success');
+    }catch(err){notify('Error: '+err.message,'error');}
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// ══════════ USERS ══════════
+function renderUsers(){
+  const tb=document.getElementById('usersTbl');if(!tb)return;
+  tb.innerHTML=S.users.map(u=>`<tr>
+    <td><div style="display:flex;align-items:center;gap:7px"><div class="av" style="width:26px;height:26px;font-size:10px">${u.name[0]}</div><b>${u.name}</b></div></td>
+    <td style="color:var(--muted)">${u.email}</td>
+    <td><span class="badge ${u.role==='admin'?'bpu':'bbl'}">${u.role}</span></td>
+    <td><span class="badge ${u.active?'bgr':'brd'}">${u.active?'Active':'Inactive'}</span></td>
+    <td><button class="btn ${u.active?'bd':'bs'} bsm" onclick="toggleActive('${u.id}')">${u.active?'Deactivate':'Activate'}</button></td>
+  </tr>`).join('');
+}
+function openAddUser(){document.getElementById('addUserModal').classList.add('open');}
+function createUser(){
+  const name=document.getElementById('nu-name').value.trim();
+  const email=document.getElementById('nu-email').value.trim();
+  const pass=document.getElementById('nu-pass').value;
+  const role=document.getElementById('nu-role').value;
+  if(!name||!email||!pass){notify('All fields required','error');return;}
+  if(S.users.find(u=>u.email===email)){notify('Email exists','error');return;}
+  S.users.push({id:'u'+Date.now(),name,email,pass,role,pages:role==='admin'?'all':[],active:true});
+  lsSave();renderUsers();closeModal('addUserModal');
+  ['nu-name','nu-email','nu-pass'].forEach(id=>document.getElementById(id).value='');
+  notify('User created ✓','success');
+}
+function toggleActive(uid){
+  if(uid===S.user.id){notify("Can't deactivate own account",'error');return;}
+  const u=S.users.find(x=>x.id===uid);
+  if(u){u.active=!u.active;lsSave();renderUsers();notify(u.name+(u.active?' activated':' deactivated'));}
+}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+</script>
+</body>
+</html>
